@@ -55,6 +55,12 @@
       padding: 10px;
       font-size: 16px;
     }
+
+    #python-editor {
+      height: 200px;
+      border: 1px solid #ccc;
+      margin: 20px 0;
+    }
   </style>
 </head>
 <body>
@@ -87,12 +93,29 @@
       <button onclick="calculate()">Calculate</button>
       <p id="result"></p>
     </div>
+    <div id="python-app">
+      <h3>Python Script Tester</h3>
+      <textarea id="python-editor"></textarea>
+      <button onclick="runPython()">Run Python</button>
+      <pre id="python-output"></pre>
+    </div>
+    <div id="notebook">
+      <h3>Interactive Python Notebook</h3>
+      <iframe src="https://nbviewer.jupyter.org/github/yanj414/my-personal-website/blob/main/interactive_python.ipynb" width="100%" height="600"></iframe>
+    </div>
   </section>
   <section id="contact">
     <h2>Contact Me</h2>
     <p>Email: your.email@example.com</p>
   </section>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
   <script>
+    const editor = CodeMirror.fromTextArea(document.getElementById('python-editor'), {
+      mode: 'python',
+      lineNumbers: true
+    });
+
     function calculate() {
       const num1 = parseFloat(document.getElementById('num1').value);
       const num2 = parseFloat(document.getElementById('num2').value);
@@ -117,6 +140,25 @@
       }
 
       document.getElementById('result').innerText = `Result: ${result}`;
+    }
+
+    function runPython() {
+      const code = editor.getValue();
+      fetch('/run', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.output) {
+          document.getElementById('python-output').innerText = data.output;
+        } else {
+          document.getElementById('python-output').innerText = data.error;
+        }
+      });
     }
   </script>
 </body>
